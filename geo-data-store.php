@@ -4,7 +4,7 @@ Plugin Name: Geo Data Store
 Plugin URI: http://l3rady.com/projects/geo-data-store/
 Description: Stores lng/lat co-ordinates in a better optimized table
 Author: Scott Cariss
-Version: 1.0
+Version: 1.1
 Author URI: http://l3rady.com/
 */
 
@@ -75,7 +75,7 @@ if (!class_exists('sc_GeoDataStore')) {
 	class sc_GeoDataStore {
 		
 		
-		private $db_version = "1.0"; // Current version of the DB
+		private $db_version = "1.1"; // Current version of the DB
 		protected $keys = array( // Array to hold meta data keys that store longitude and latitude values
 							'lat' => array(), // just latitude keys
 						  	'lng' => array(), // just longitude keys
@@ -122,7 +122,7 @@ if (!class_exists('sc_GeoDataStore')) {
 						  `lat` float(10,6) NOT NULL,
 						  `lng` float(10,6) NOT NULL,
 						  PRIMARY KEY  (`post_id`),
-						  UNIQUE KEY `post_type` (`post_type`,`lat`,`lng`)
+						  KEY `post_type` (`post_type`,`lat`,`lng`)
 						) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
 				// Include upgrade.php because it has dbDelta() function that we need
 				require_once(ABSPATH . "wp-admin/includes/upgrade.php");
@@ -283,6 +283,73 @@ if (!class_exists('sc_GeoDataStore')) {
 			} // End if any keys
 			
 		} // End function reindex
+		
+		
+		/**
+		 * Get all post id's of those that are in range
+		 *
+		 * @param string $post_type The post type of posts you are searching
+		 * @param int $radius The search radius in MILES
+		 * @param float $search_lat The latitude of where you are searching
+		 * @param float $search_lng The Longitude of where you are searching
+		 * @param string $orderby What order do you want the ID's returned as? ordered by distance ASC or DESC?
+		 * @return array $wpdb->get_col() array of ID's of posts in radius. You can use this array in 'post__in' in WP_Query
+		*/
+		public function getPostIDsOfInRange($post_type, $radius = 50, $search_lat = 51.499882, $search_lng = -0.126178, $orderby = "ASC") {
+			global $wpdb;// Dont forget to include wordpress DB class
+			
+			// Calculate square radius search
+			$lat1 = (float) $search_lat - ( (int) $radius / 69 );
+			$lat2 = (float) $search_lat + ( (int) $radius / 69 );
+			$lng1 = (float) $search_lng - (int) $radius / abs( cos( deg2rad( (float) $search_lat ) ) * 69 );
+			$lng2 = (float) $search_lng + (int) $radius / abs( cos( deg2rad( (float) $search_lat ) ) * 69 );
+			
+			$sqlsquareradius = "
+			SELECT
+				`$this->tablename`.`post_id`,
+				`$this->tablename`.`lat`,
+				`$this->tablename`.`lng`
+			FROM
+				`$this->tablename`
+			WHERE
+				`$this->tablename`.`post_type` = '".$post_type."'
+			AND
+				`$this->tablename`.`lat` BETWEEN '".$lat1."' AND '".$lat2."'
+			AND
+				`$this->tablename`.`lng` BETWEEN '".$lng1."' AND '".$lng2."'
+			"; // End $sqlsquareradius
+			
+			// Create sql for circle radius check
+			$sqlcircleradius = "
+			SELECT
+				`t`.`post_id`,
+				3956 * 2 * ASIN(
+					SQRT(
+						POWER(
+							SIN(
+								( ".(float) $search_lat." - `t`.`lat` ) * pi() / 180 / 2
+							), 2
+						) + COS(
+							".(float) $search_lat." * pi() / 180
+						) * COS(
+							`t`.`lat` * pi() / 180
+						) * POWER(
+							SIN(
+								( ".(float) $search_lng." - `t`.`lng` ) * pi() / 180 / 2
+							), 2
+						)
+					)
+				) AS `distance`
+			FROM
+				(".$sqlsquareradius.") AS `t`
+			HAVING
+				`distance` <= ".(int) $radius."
+			ORDER BY `distance` ".$orderby."
+			"; // End $sqlcircleradius
+			
+			return $wpdb->get_col($sqlcircleradius);
+			
+		} // End function getPostIDsOfInRange
 		
 	} // End class sc_GeoDataStore
 	
