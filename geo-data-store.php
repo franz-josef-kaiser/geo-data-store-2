@@ -4,7 +4,7 @@ Plugin Name: Geo Data Store
 Plugin URI: http://l3rady.com/projects/geo-data-store/
 Description: Stores lng/lat co-ordinates in a better optimized table
 Author: Scott Cariss
-Version: 1.1
+Version: 1.2
 Author URI: http://l3rady.com/
 */
 
@@ -75,7 +75,7 @@ if (!class_exists('sc_GeoDataStore')) {
 	class sc_GeoDataStore {
 		
 		
-		private $db_version = "1.1"; // Current version of the DB
+		private static $db_version = "1.1"; // Current version of the DB
 		protected $keys = array( // Array to hold meta data keys that store longitude and latitude values
 							'lat' => array(), // just latitude keys
 						  	'lng' => array(), // just longitude keys
@@ -91,6 +91,8 @@ if (!class_exists('sc_GeoDataStore')) {
 		 * Setup activation hook and check we running latest version of DB.
 		*/
 		function __construct() {
+			// Internationalization
+			load_plugin_textdomain('geo-data-store', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/');
 			// Create action hook to allow DB to be re-indexed
 			add_action('sc_geodatastore_reindex', array(&$this, 'reindex'));
 			// Hook into when Wordpress updates or adds meta data
@@ -100,9 +102,43 @@ if (!class_exists('sc_GeoDataStore')) {
 			add_action('deleted_post_meta', array(&$this, 'deleted_post_meta'), 10, 4);
 			// Setup activation hook
 			register_activation_hook(__FILE__, array(&$this, 'activate'));
+			// Define the permission to re-index
+			if(!defined('SC_GDS_REINDEX_PERMISSION')) {define('SC_GDS_REINDEX_PERMISSION', 'manage_options');}
+			// Add reindex plugin link
+			add_filter('plugin_action_links', array(&$this, 'plugin_action_links'), 10, 2);
+			add_action('init', array(&$this, 'things_to_do')); // Check for things to do when needed
 			// Check we are running latest DB
 			$this->checkDBVersion();
 		} // End __construct function
+		
+		
+		/**
+		 * Adds Re-Index Table link to plugin.
+		*/
+		public function plugin_action_links($links, $file) {
+			static $this_plugin;
+			
+			if (!$this_plugin) {
+				$this_plugin = plugin_basename(__FILE__);
+			}
+			
+			if ($file == $this_plugin){
+				$settings_link = '<a href="'.site_url().'/wp-admin/plugins.php?sc_geodatastore_reindex=1">'.__("Re-index Table", "geo-data-store").'</a>';
+				array_unshift($links, $settings_link);
+			}
+			
+			return $links;
+		} // End plugin_action_links function
+		
+		
+		/**
+		 * Lookout for actions this plugin needs to perform on
+		*/
+		public function things_to_do() {
+			if((int) $_GET['sc_geodatastore_reindex'] == 1 && current_user_can(SC_GDS_REINDEX_PERMISSION)) {
+				do_action("sc_geodatastore_reindex");
+			}
+		}
 		
 		
 		/**
@@ -114,7 +150,7 @@ if (!class_exists('sc_GeoDataStore')) {
 			$this->tablename = $wpdb->prefix."geodatastore"; // Set the table name being used by this plugin
 			
 			// Does the current table version match the version used in this plugin?
-			if($current_db_version != $this->db_version) {
+			if($current_db_version != self::$db_version) {
 				// No. Lets create table.
 				$sql = "CREATE TABLE IF NOT EXISTS `".$this->tablename."` (
 						  `post_id` int(11) NOT NULL,
@@ -127,7 +163,7 @@ if (!class_exists('sc_GeoDataStore')) {
 				// Include upgrade.php because it has dbDelta() function that we need
 				require_once(ABSPATH . "wp-admin/includes/upgrade.php");
 				dbDelta($sql); // Create DB table. More on dbDelta here: http://codex.wordpress.org/Creating_Tables_with_Plugins
-				update_option("sc_gds_db_version", $this->db_version); // set the latest DB version
+				update_option("sc_gds_db_version", self::$db_version); // set the latest DB version
 			} // End if current DB version = to plugin DB
 			
 		} // End checkDBVersion function
@@ -350,6 +386,50 @@ if (!class_exists('sc_GeoDataStore')) {
 			return $wpdb->get_col($sqlcircleradius);
 			
 		} // End function getPostIDsOfInRange
+		
+		
+		/**
+		 * Get all post id's ordered by distance from given point
+		 *
+		 * @param string $post_type The post type of posts you are searching
+		 * @param float $search_lat The latitude of where you are searching
+		 * @param float $search_lng The Longitude of where you are searching
+		 * @param string $orderby What order do you want the ID's returned as? ordered by distance ASC or DESC?
+		 * @return array $wpdb->get_col() array of ID's in ASC or DESC order as distance from point
+		*/
+		public function getPostIDsByRange($post_type, $search_lat = 51.499882, $search_lng = -0.126178, $orderby = "ASC") {
+			global $wpdb;// Dont forget to include wordpress DB class
+			
+			// Create sql for distance check
+			$sqldistancecheck = "
+			SELECT
+				`$this->tablename`.`post_id`,
+				3956 * 2 * ASIN(
+					SQRT(
+						POWER(
+							SIN(
+								( ".(float) $search_lat." - `t`.`lat` ) * pi() / 180 / 2
+							), 2
+						) + COS(
+							".(float) $search_lat." * pi() / 180
+						) * COS(
+							`t`.`lat` * pi() / 180
+						) * POWER(
+							SIN(
+								( ".(float) $search_lng." - `t`.`lng` ) * pi() / 180 / 2
+							), 2
+						)
+					)
+				) AS `distance`
+			FROM
+				`$this->tablename`
+			WHERE
+				`$this->tablename`.`post_type` = '".$post_type."'
+			ORDER BY `distance` ".$orderby."
+			"; // End $sqldistancecheck
+			
+			return $wpdb->get_col($sqldistancecheck);
+		} // End function getPostIDsByRange
 		
 	} // End class sc_GeoDataStore
 	
