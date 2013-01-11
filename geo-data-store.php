@@ -4,7 +4,7 @@ Plugin Name: Geo Data Store
 Plugin URI: http://l3rady.com/projects/geo-data-store/
 Description: Stores lng/lat co-ordinates in a better optimized table
 Author: Scott Cariss
-Version: 2.0.2
+Version: 2.0.3
 Author URI: http://l3rady.com/
 */
 
@@ -197,7 +197,7 @@ if ( ! class_exists( 'sc_GeoDataStore' ) )
 
                 $coords = explode( ',', $meta_value );
 
-                $wpdb->query( "INSERT INTO `" . $wpdb->prefix . self::$tablename . "` (`post_id`, `meta_id`, `post_type`, `lat`, `lng`) VALUES (".(int) $post_id.", ".(int) $meta_ids.", '{$post_type}', '".(float) $coords[0]."', '".(float) $coords[1]."') ON DUPLICATE KEY UPDATE `lat` = '".(float) $coords[0]."' AND `lng` = '".(float) $coords[1]."'");
+                $wpdb->query( "INSERT INTO `" . $wpdb->prefix . self::$tablename . "` (`post_id`, `meta_id`, `post_type`, `lat`, `lng`) VALUES (".(int) $post_id.", ".(int) $meta_ids.", '{$post_type}', '".(float) $coords[0]."', '".(float) $coords[1]."') ON DUPLICATE KEY UPDATE `lat` = '".(float) $coords[0]."', `lng` = '".(float) $coords[1]."'");
 
                 return;
             }

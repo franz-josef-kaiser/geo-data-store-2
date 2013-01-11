@@ -4,7 +4,7 @@ Donate link: http://l3rady.com/donate
 Tags: geo, location, latitude, longitude, plugin
 Requires at least: 3.2
 Tested up to: 3.4.1
-Stable tag: 2.0.2
+Stable tag: 2.0.3
 
 Stores lng/lat co-ordinates in a better optimized table. This plugin is meant for the use of other WordPress theme and plugin authors
 
@@ -36,6 +36,9 @@ This plugin is currently limited to only allowing one pair of co-ordinates per p
 * Add `sc_geodatastore_meta_keys` filter to your functions of plugin file to set what meta data keys to capture.
 
 == Changelog ==
+
+= 2.0.3 =
+* Fixed typo in SQL query preventing data store being updated from meta updates.
 
 = 2.0.2 =
 * Fixed typo in SQL query preventing data store being updated from meta updates.
