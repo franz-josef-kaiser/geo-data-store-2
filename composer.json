@@ -31,7 +31,6 @@
 		}
 	},
     "minimum-stability": "dev",
-	"require": {
-		"composer/composer": "*"
-	}
+	"require": {},
+	"requireDev": {}
 }
