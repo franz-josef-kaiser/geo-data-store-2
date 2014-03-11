@@ -26,7 +26,11 @@ class sc_GeoDataStore
 	public static function init()
     {
 		// Internationalization
-		load_plugin_textdomain( 'geo-data-store', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+		load_plugin_textdomain(
+			'geo-data-store',
+			false,
+			dirname( plugin_basename( __FILE__ ) ).'/lang'
+		);
 
 		// Create action hook to allow DB to be re-indexed
 		add_action( 'sc_geodatastore_reindex', array( __CLASS__ , 'reindex' ) );
@@ -153,11 +157,16 @@ class sc_GeoDataStore
 	 * @param array $deleted_meta_ids Array of Meta data row ID's that were deleted
 	 * @param int $post_id Post ID
 	 * @param string $meta_key Meta data key name
-	 * @param array $only_delete_these_meta_values Dunno whats here but dont need it anywway...
+	 * @param array $only_delete_these_meta_values Dunno whats here but don't need it anyway...
 	*/
-	public static function delete_post_meta( $deleted_meta_ids, $post_id, $meta_key, $only_delete_these_meta_values )
+	public static function delete_post_meta(
+		$deleted_meta_ids,
+		$post_id,
+		$meta_key,
+		$only_delete_these_meta_values
+		)
     {
-		self::meta_data_captured( $deleted_meta_ids, "", "", "delete" );
+		self::meta_data_captured( $deleted_meta_ids, "", "", 'delete' );
 	}
 
 
@@ -172,7 +181,13 @@ class sc_GeoDataStore
     }
 
 
-	private static function meta_data_captured( $meta_ids, $post_id, $meta_key, $action = "add", $meta_value = 0 )
+	private static function meta_data_captured(
+		$meta_ids,
+		$post_id,
+		$meta_key,
+		$action = 'add',
+		$meta_value = 0
+		)
     {
 		global $wpdb;
 
@@ -181,26 +196,33 @@ class sc_GeoDataStore
 		if ( ! in_array( $meta_key, $keys ) )
             return;
 
-        if ( $action == "add" )
+        if ( 'add' === $action )
         {
             $post_type = get_post_type( $post_id );
-
             $coords = explode( ',', $meta_value );
-
-            $wpdb->query( "INSERT INTO `" . $wpdb->prefix . self::$tablename . "` (`post_id`, `meta_id`, `post_type`, `lat`, `lng`) VALUES (".(int) $post_id.", ".(int) $meta_ids.", '{$post_type}', '".(float) $coords[0]."', '".(float) $coords[1]."') ON DUPLICATE KEY UPDATE `lat` = '".(float) $coords[0]."', `lng` = '".(float) $coords[1]."'");
-
+            $wpdb->query(
+	            "INSERT INTO `".$wpdb->prefix.self::$tablename
+	            ."` (`post_id`, `meta_id`, `post_type`, `lat`, `lng`) VALUES ("
+	                .(int) $post_id.", "
+	                .(int) $meta_ids.", '{$post_type}', '"
+	                .(float) $coords[0]."', '"
+	                .(float) $coords[1]
+	            ."') ON DUPLICATE KEY UPDATE `lat` = '".(float) $coords[0]
+	                ."', `lng` = '".(float) $coords[1]."'"
+            );
             return;
         }
 
-        if ( $action == "delete" )
+        if ( 'delete' === $action )
         {
             $meta_ids = (array) $meta_ids;
 
-            $wpdb->query( "DELETE FROM `" . $wpdb->prefix . self::$tablename . "` WHERE `meta_id` IN({$meta_ids})" );
-
+            $wpdb->query(
+	            "DELETE FROM `".$wpdb->prefix.self::$tablename
+	            ."` WHERE `meta_id` IN({$meta_ids})"
+            );
             return;
         }
-
 		return;
 	}
 
@@ -235,10 +257,11 @@ class sc_GeoDataStore
         if( array() === $keys )
             return;
 
-        $sql  = "TRUNCATE TABLE " . $wpdb->prefix . self::$tablename . ";";
-        $wpdb->query($sql);
+        $sql  = "TRUNCATE TABLE ".$wpdb->prefix.self::$tablename.";";
+        $wpdb->query( $sql );
 
-        $sql = "INSERT INTO " . $wpdb->prefix . self::$tablename . " (`post_id`, `meta_id`, `post_type`, `lat`, `lng`) ";
+        $sql  = "INSERT INTO ".$wpdb->prefix.self::$tablename
+	        ." (`post_id`, `meta_id`, `post_type`, `lat`, `lng`) ";
         $sql .= "
             SELECT
                 `{$wpdb->posts}`.`ID` AS `post_id`,
@@ -248,7 +271,11 @@ class sc_GeoDataStore
                 SUBSTRING_INDEX( `{$wpdb->postmeta}`.`meta_value`, ',', -1) AS lng
             FROM
                 `{$wpdb->posts}`
-                JOIN `{$wpdb->postmeta}` ON (`{$wpdb->posts}`.`ID` = `{$wpdb->postmeta}`.`post_id` AND `{$wpdb->postmeta}`.`meta_key` IN ('".implode('\', \'',$keys)."'))
+                JOIN `{$wpdb->postmeta}`
+                ON (
+                    `{$wpdb->posts}`.`ID` = `{$wpdb->postmeta}`.`post_id`
+                    AND `{$wpdb->postmeta}`.`meta_key` IN ('".implode('\', \'',$keys)."')
+                    )
             ";
 
         $sql .= " ON DUPLICATE KEY UPDATE `lat` = VALUES(`lat`), `lng` = VALUES(`lng`)";
@@ -259,13 +286,14 @@ class sc_GeoDataStore
 
 	/**
 	 * Get all post id's of those that are in range
-	 *
+
 	 * @param string $post_type The post type of posts you are searching
 	 * @param int $radius The search radius in MILES
 	 * @param float $search_lat The latitude of where you are searching
 	 * @param float $search_lng The Longitude of where you are searching
 	 * @param string $orderby What order do you want the ID's returned as? ordered by distance ASC or DESC?
-	 * @return array $wpdb->get_col() array of ID's of posts in radius. You can use this array in 'post__in' in WP_Query
+	 * @return array $wpdb->get_col() array of ID's of posts in radius.
+	 *          You can use this array in 'post__in' in WP_Query
 	*/
 	public static function getPostIDsOfInRange( $post_type, $radius = 50, $search_lat = 51.499882, $search_lng = -0.126178, $orderby = "ASC" )
 	{
@@ -279,17 +307,17 @@ class sc_GeoDataStore
 
 		$sqlsquareradius = "
 		SELECT
-			`" . $wpdb->prefix . self::$tablename . "`.`post_id`,
-			`" . $wpdb->prefix . self::$tablename . "`.`lat`,
-			`" . $wpdb->prefix . self::$tablename . "`.`lng`
+			`".$wpdb->prefix.self::$tablename."`.`post_id`,
+			`".$wpdb->prefix.self::$tablename."`.`lat`,
+			`".$wpdb->prefix.self::$tablename."`.`lng`
 		FROM
-			`" . $wpdb->prefix . self::$tablename . "`
+			`".$wpdb->prefix.self::$tablename."`
 		WHERE
-			`" . $wpdb->prefix . self::$tablename . "`.`post_type` = '{$post_type}'
+			`".$wpdb->prefix.self::$tablename."`.`post_type` = '{$post_type}'
 		AND
-			`" . $wpdb->prefix . self::$tablename . "`.`lat` BETWEEN '{$lat1}' AND '{$lat2}'
+			`".$wpdb->prefix.self::$tablename."`.`lat` BETWEEN '{$lat1}' AND '{$lat2}'
 		AND
-			`" . $wpdb->prefix . self::$tablename . "`.`lng` BETWEEN '{$lng1}' AND '{$lng2}'
+			`".$wpdb->prefix.self::$tablename."`.`lng` BETWEEN '{$lng1}' AND '{$lng2}'
 		"; // End $sqlsquareradius
 
 		// Create sql for circle radius check
@@ -334,7 +362,12 @@ class sc_GeoDataStore
 	 * @param string $orderby What order do you want the ID's returned as? ordered by distance ASC or DESC?
 	 * @return array $wpdb->get_col() array of ID's in ASC or DESC order as distance from point
 	*/
-	public static function getPostIDsByRange( $post_type, $search_lat = 51.499882, $search_lng = -0.126178, $orderby = "ASC" )
+	public static function getPostIDsByRange(
+		$post_type,
+		$search_lat = 51.499882,
+		$search_lng = -0.126178,
+		$orderby = "ASC"
+		)
 	{
 		// Dont forget to include wordpress DB class
 		global $wpdb;
@@ -347,7 +380,8 @@ class sc_GeoDataStore
 				SQRT(
 					POWER(
 						SIN(
-							( ".(float) $search_lat." - `" . $wpdb->prefix . self::$tablename . "`.`lat` ) * pi() / 180 / 2
+							( ".(float) $search_lat." - `" . $wpdb->prefix . self::$tablename . "`.`lat` )
+							* pi() / 180 / 2
 						), 2
 					) + COS(
 						".(float) $search_lat." * pi() / 180
@@ -355,15 +389,16 @@ class sc_GeoDataStore
 						`" . $wpdb->prefix . self::$tablename . "`.`lat` * pi() / 180
 					) * POWER(
 						SIN(
-							( ".(float) $search_lng." - `" . $wpdb->prefix . self::$tablename . "`.`lng` ) * pi() / 180 / 2
+							( ".(float) $search_lng." - `" . $wpdb->prefix . self::$tablename . "`.`lng` )
+							* pi() / 180 / 2
 						), 2
 					)
 				)
 			) AS `distance`
 		FROM
-			`" . $wpdb->prefix . self::$tablename . "`
+			`".$wpdb->prefix.self::$tablename."`
 		WHERE
-			`" . $wpdb->prefix . self::$tablename . "`.`post_type` = '{$post_type}'
+			`".$wpdb->prefix.self::$tablename."`.`post_type` = '{$post_type}'
 		ORDER BY `distance` {$orderby}
 		"; // End $sqldistancecheck
 
