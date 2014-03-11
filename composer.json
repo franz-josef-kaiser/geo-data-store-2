@@ -10,7 +10,7 @@
 		"geocoding"
 	],
 	"homepage" : "https://github.com/franz-josef-kaiser/geo-data-store-2",
-    "license": "GPL v2+",
+    "license": "GPL-2.0+",
     "authors": [
         {
             "name": "Kaiser Franz Josef",
@@ -24,6 +24,10 @@
 	        "role": "Original author"
         }
     ],
+	"support"    : {
+		"issues": "https://github.com/franz-josef-kaiser/geo-data-store-2/issues",
+		"source": "https://github.com/franz-josef-kaiser/geo-data-store-2"
+	},
 	"replace": {
 		"l3rady/geo-data-store": "2.0.3"
 	},
