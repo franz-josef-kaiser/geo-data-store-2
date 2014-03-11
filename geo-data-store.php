@@ -73,14 +73,13 @@ class sc_GeoDataStore
 	*/
 	public static function plugin_action_links( $links, $file )
     {
-		static $this_plugin;
-
-		if ( ! $this_plugin )
-			$this_plugin = plugin_basename( __FILE__ );
-
-		if ( $file == $this_plugin )
+		if ( plugin_basename( __FILE__ ) === $file )
         {
-			$settings_link = '<a href="' . admin_url( 'plugins.php?sc_geodatastore_reindex=1' ) . '">' . __( "Re-index Table", "geo-data-store" ) . '</a>';
+			$settings_link = sprintf(
+				'<a href="%s">%s</a>',
+				admin_url( 'plugins.php?sc_geodatastore_reindex=1' ),
+				__( 'Re-index Table', 'geo-data-store' )
+			);
 			array_unshift( $links, $settings_link );
 		}
 
