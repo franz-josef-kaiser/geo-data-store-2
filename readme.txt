@@ -29,7 +29,9 @@ for storing latitude and longitude co-ordinates.
 Upon plugin activate existing data will be index and any data from then on.
 
 Usage:
-Before activating set what meta keys you want this plugin to capture by using the filter 'sc_geodatastore_meta_keys'. Your latitude and longitude values have to be stored in a single meta field like: `51.507334,-0.127682`
+Before activating set what meta keys you want this plugin to capture
+by using the filter 'sc_geodatastore_meta_keys'.
+Your latitude and longitude values have to be stored in a single meta field like: `51.507334,-0.127682`
 
 Example usage of the filter:
 
