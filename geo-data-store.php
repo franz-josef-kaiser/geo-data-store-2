@@ -14,10 +14,14 @@ namespace WCM;
 add_action( 'plugins_loaded', 'WCM\GeoDataStoreInit' );
 function GeoDataStoreInit()
 {
-	sc_GeoDataStore::init();
+	GeoDataStore::init();
 }
 
-class sc_GeoDataStore
+/**
+ * Class GeoDataStore
+ * @package WCM
+ */
+class GeoDataStore
 {
 	// Current version of the DB
 	private static $db_version = "2.0";
@@ -160,7 +164,7 @@ class sc_GeoDataStore
 	 * @param array $only_delete_these_meta_values Dunno whats here but don't need it anyway...
 	*/
 	public static function delete_post_meta(
-		$deleted_meta_ids,
+		Array $deleted_meta_ids,
 		$post_id,
 		$meta_key,
 		$only_delete_these_meta_values
