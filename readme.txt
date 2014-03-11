@@ -1,18 +1,32 @@
 === Plugin Name ===
-Contributors: l3rady
-Donate link: http://l3rady.com/donate
+Contributors: F J Kaiser, l3rady
+Donate link: http://unserkaiser.com/donate
 Tags: geo, location, latitude, longitude, plugin
-Requires at least: 3.2
-Tested up to: 3.4.1
-Stable tag: 2.0.3
+Requires at least: 3.8
+Tested up to: 3.8.1
+Stable tag: 3.0.0
 
-Stores lng/lat co-ordinates in a better optimized table. This plugin is meant for the use of other WordPress theme and plugin authors
+Stores lng/lat co-ordinates in a better optimized table.
+This plugin is meant for the use of other WordPress theme and plugin authors.
 
 == Description ==
 
-This plugin is meant to be used by other developers and to be used together with themes and other plugins. Many themes and plugins use WordPress meta data table to store longitude and latitude co-ordinates for posts. While this works fine the meta data table cannot be indexed very well. Let's take for example you have made a custom post type called 'properties'. You create 100,000 posts all attached with latitude and longitude co-ordinates. You want your users to search for those properties in a 50 mile radius for example. Because of the method of which WordPress stores the meta data the query is slow especially when dealing with large amounts of data.
+This Plugin <strong>needs PHP 5.3.*</strong> or later.
 
-This plugin has been made to retro fit your current WordPress install. You as the developer select, using filters, what meta data you want to start capturing and this plugin will put the data in a table better optimized for storing latitude and longitude co-ordinates. Upon plugin activate existing data will be index and any data from then on.
+This plugin is meant to be used by other developers and to be used together with themes and other plugins.
+Many themes and plugins use WordPress meta data table to store longitude and latitude co-ordinates for posts.
+While this works fine the meta data table cannot be indexed very well.
+Let's take for example you have made a custom post type called 'properties'.
+You create 100,000 posts all attached with latitude and longitude co-ordinates.
+You want your users to search for those properties in a 50 mile radius for example.
+Because of the method of which WordPress stores the meta data the query is slow especially
+when dealing with large amounts of data.
+
+This plugin has been made to retro fit your current WordPress install.
+You as the developer select, using filters, what meta data you want to start capturing
+and this plugin will put the data in a table better optimized
+for storing latitude and longitude co-ordinates.
+Upon plugin activate existing data will be index and any data from then on.
 
 Usage:
 Before activating set what meta keys you want this plugin to capture by using the filter 'sc_geodatastore_meta_keys'. Your latitude and longitude values have to be stored in a single meta field like: `51.507334,-0.127682`
@@ -27,7 +41,10 @@ Example usage of the filter:
 	}
 
 Notice:
-This plugin is currently limited to only allowing one pair of co-ordinates per post. Maybe in a later version I will allow multiple pairs per post, but since this plugin was made to serve my purpose and it serves it well I see no reason to build upon it yet.
+This plugin is currently limited to only allowing one pair of co-ordinates per post.
+Maybe in a later version I will allow multiple pairs per post,
+but since this plugin was made to serve my purpose
+and it serves it well I see no reason to build upon it yet.
 
 == Installation ==
 
@@ -36,6 +53,9 @@ This plugin is currently limited to only allowing one pair of co-ordinates per p
 * Add `sc_geodatastore_meta_keys` filter to your functions of plugin file to set what meta data keys to capture.
 
 == Changelog ==
+
+= 3.0.0 =
+* Massive rework.
 
 = 2.0.3 =
 * Fixed typo in SQL query preventing data store being updated from meta updates.
