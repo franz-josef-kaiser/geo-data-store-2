@@ -1,0 +1,7 @@
+## IDEs
+# PHPStorm
+.idea
+
+## Package Managers
+# Composer
+vendor
