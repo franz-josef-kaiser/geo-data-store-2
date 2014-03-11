@@ -7,7 +7,7 @@ namespace WCM;
  * Plugin URI:  https://github.com/franz-josef-kaiser/geo-data-store-2
  * Description: Stores lng/lat co-ordinates in a better optimized table
  * Author:      Franz Josef Kaiser
- * Version:     1.0.0
+ * Version:     3.0.0
  * Author URI:  http://unserkaiser.com/
  */
 
