@@ -24,6 +24,9 @@
 	        "role": "Original author"
         }
     ],
+	"replace": {
+		"l3rady/geo-data-store": "2.0.3"
+	},
 	"autoload" : {
 		"psr-4" : {
 			"WCM\\" : "",
