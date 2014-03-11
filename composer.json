@@ -1,14 +1,27 @@
 {
     "name": "wcm/geo-data-store-2",
     "description": "A WordPress plugin that stores lat/lng data in a better optimized table",
-    "require": {
-        "composer/composer": "*"
-    },
+	"keywords": [
+		"wordpress",
+		"plugin",
+		"latitude",
+		"longitude",
+		"geocoder",
+		"geocoding"
+	],
+	"homepage" : "https://github.com/franz-josef-kaiser/geo-data-store-2",
     "license": "GPL v2+",
     "authors": [
         {
             "name": "Kaiser Franz Josef",
-            "email": "wecodemore@gmail.com"
+            "email": "wecodemore@gmail.com",
+	        "homepage": "http://marvel.com",
+	        "role": "Current Author"
+        },
+        {
+            "name": "Scott Carris",
+	        "homepage": "http://l3rady.com/",
+	        "role": "Original author"
         }
     ],
 	"autoload" : {
@@ -17,5 +30,8 @@
 			"WCM\\GeoDataStore\\" : "src"
 		}
 	},
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+	"require": {
+		"composer/composer": "*"
+	}
 }
